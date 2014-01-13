@@ -40,6 +40,8 @@ class mainFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent=None, title='Main frame', size=(1000,600), pos=(50,50))
 
+        self.panel = CanvasPanel(self)
+
         #### make menu bar and menu
 
         self.filemenu = wx.Menu()
@@ -47,6 +49,8 @@ class mainFrame(wx.Frame):
         # TODO: why do these texts/shortcuts not show up in the same way in the actual menu?
         self.menuAbout = self.filemenu.Append(id=self.aboutId, text='About\tCtrl+a', help='Informations')
         self.menuExit = self.filemenu.Append(id=self.exitId, text='Exit\tCtrl+w', help='Quit')
+        self.menuLoad = self.filemenu.Append(id=-1, text='Load data\tCtrl+l', help='Load data')
+        self.menuReset = self.filemenu.Append(id=-1, text='Reset 1D plot\tCtrl+r', help='Reset 1D plot')
 
         self.menubar = wx.MenuBar()
         self.menubar.Append(self.filemenu, title='File')
@@ -54,6 +58,9 @@ class mainFrame(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.onAbout, source=self.menuAbout)
         self.Bind(wx.EVT_MENU, self.onExit, source=self.menuExit)
+        self.Bind(wx.EVT_MENU, self.panel.onLoad, source=self.menuLoad)
+        self.Bind(wx.EVT_MENU, self.panel.onReset, source=self.menuReset)
+        
 
     def onAbout(self, e):
         dlg = wx.MessageDialog(self, 'A data explorer.', 'About the data explorer', wx.OK)
@@ -266,11 +273,10 @@ class CanvasPanel(wx.Panel):
 if __name__ == "__main__":
     app = wx.App(False)
     fr = mainFrame(None)
-    panel = CanvasPanel(fr)
     fr.Show()
     # start with focus on first input text box
     if (debug):
-        panel.loadBtn.SetFocus()
+        fr.panel.loadBtn.SetFocus()
     else:
-        panel.baseInput.SetFocus()
+        fr.panel.baseInput.SetFocus()
     app.MainLoop()
