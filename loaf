@@ -74,6 +74,8 @@ class CanvasPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self.zData = np.arange(100).reshape(10,10)
+        self.xIdx = -1
+        self.yIdx = -1
 
         #### make sizers
 
@@ -102,6 +104,7 @@ class CanvasPanel(wx.Panel):
         self.drawPlot2D()
         # bind clicking on plot
         self.plot.mpl_connect('button_press_event', self.onPlotClick)
+        self.plot.mpl_connect('key_press_event', self.onKey)
 
         # text input objects
         self.baseText = wx.StaticText(self, -1, "base pathname")
@@ -132,15 +135,15 @@ class CanvasPanel(wx.Panel):
 
         self.plotSizer.Add(self.plot, 1, wx.EXPAND)
         self.textInputSizer.Add(self.baseText, 0, wx.ALIGN_RIGHT)
-        self.textInputSizer.Add(self.baseInput, 2, wx.EXPAND)
+        self.textInputSizer.Add(self.baseInput, 1, wx.EXPAND)
         self.textInputSizer.Add(self.middleText, 0, wx.ALIGN_RIGHT)
-        self.textInputSizer.Add(self.middleInput, 2, wx.EXPAND)
+        self.textInputSizer.Add(self.middleInput, 1, wx.EXPAND)
         self.textInputSizer.Add(self.endText, 0, wx.ALIGN_RIGHT)
-        self.textInputSizer.Add(self.endInput, 2, wx.EXPAND)
+        self.textInputSizer.Add(self.endInput, 1, wx.EXPAND)
         self.textInputSizer.Add(self.text1D, 0, wx.ALIGN_RIGHT)
-        self.textInputSizer.Add(self.text1DInput, 2, wx.EXPAND)
+        self.textInputSizer.Add(self.text1DInput, 1, wx.EXPAND)
         self.textInputSizer.Add(self.text2D, 0, wx.ALIGN_RIGHT)
-        self.textInputSizer.Add(self.text2DInput, 2, wx.EXPAND)
+        self.textInputSizer.Add(self.text2DInput, 1, wx.EXPAND)
         self.buttonSizer.Add(self.loadBtn, 0, wx.EXPAND)
         self.buttonSizer.Add(self.resetBtn, 0, wx.EXPAND)
 
@@ -148,6 +151,36 @@ class CanvasPanel(wx.Panel):
 
         self.SetSizer(self.topSizer)
         self.Fit()
+
+    def onKey(self, e):
+        if (debug):
+            print('you pressed', e.key, e.xdata, e.ydata)
+        # make sure data has been plotted
+        if ((hasattr(self, 'xDim')) and (hasattr(self,'yDim'))):
+            # make sure plot has been clicked
+            if ((self.xIdx > -1) and (self.yIdx > -1)):
+                if (e.key == 'up'):
+                    if (self.yIdx > 0):
+                        self.yIdx -= 1
+                        print 'going one up'
+                if (e.key == 'right'):
+                    if (self.xIdx < (self.xDim - 1)):
+                        self.xIdx += 1
+                        print 'going one right'
+                if (e.key == 'down'):
+                    if (self.yIdx < (self.yDim - 1)):
+                        self.yIdx += 1
+                        print 'going one down'
+                if (e.key == 'left'):
+                    if (self.xIdx > 0):
+                        self.xIdx -= 1
+                        print 'going one left'
+            else:
+                if (debug):
+                    print 'indices not valid'
+        else:
+            if (debug):
+                print 'attribute not defined'
 
     def onLoad(self, e):
         '''
@@ -268,12 +301,16 @@ class CanvasPanel(wx.Panel):
         On click on 2D plot, update the 1D plot with the appropriate data file
         '''
         if (e.inaxes == self.axes2D):
-            xIdx, yIdx = int(round(e.xdata)), int(round(e.ydata))
-            if (debug):
-                print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
-                    e.button, e.x, e.y, e.xdata, e.ydata)
-                print xIdx, yIdx
-            self.drawPlot1D(self.dataMap[(xIdx, yIdx)].file1D)
+            try:
+                self.xIdx, self.yIdx = int(round(e.xdata)), int(round(e.ydata))
+                if (debug):
+                    print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
+                        e.button, e.x, e.y, e.xdata, e.ydata)
+                    print self.xIdx, self.yIdx
+                self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+            except AttributeError:
+                if (debug):
+                    print 'Data not loaded, not plotting.'
 
 if __name__ == "__main__":
     app = wx.App(False)
