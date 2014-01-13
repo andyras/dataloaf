@@ -84,11 +84,11 @@ class CanvasPanel(wx.Panel):
         #### make objects
 
         # mp figure object for 1D plot
-        self.figure1D = Figure()
+        self.figure = Figure()
         gs = mp.gridspec.GridSpec(1, 2, width_ratios=[1,1.618])
-        self.axes2D = self.figure1D.add_subplot(gs[0])
-        self.axes1D = self.figure1D.add_subplot(gs[1])
-        self.plot1D = FigureCanvas(self, -1, self.figure1D)
+        self.axes2D = self.figure.add_subplot(gs[0])
+        self.axes1D = self.figure.add_subplot(gs[1])
+        self.plot = FigureCanvas(self, -1, self.figure)
         self.drawPlot1D('data/d1_1_d2_1/pts.dat')
         self.drawPlot2D()
 
@@ -116,16 +116,16 @@ class CanvasPanel(wx.Panel):
 
         #### add objects to sizers
 
-        self.plotSizer.Add(self.plot1D, 1, wx.EXPAND)
-        self.textInputSizer.Add(self.baseText, 1, wx.ALIGN_LEFT)
+        self.plotSizer.Add(self.plot, 1, wx.EXPAND)
+        self.textInputSizer.Add(self.baseText, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.baseInput, 2, wx.EXPAND)
-        self.textInputSizer.Add(self.middleText, 1, wx.ALIGN_LEFT)
+        self.textInputSizer.Add(self.middleText, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.middleInput, 2, wx.EXPAND)
-        self.textInputSizer.Add(self.endText, 1, wx.ALIGN_LEFT)
+        self.textInputSizer.Add(self.endText, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.endInput, 2, wx.EXPAND)
-        self.textInputSizer.Add(self.text1D, 1, wx.ALIGN_LEFT)
+        self.textInputSizer.Add(self.text1D, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.text1DInput, 2, wx.EXPAND)
-        self.textInputSizer.Add(self.text2D, 1, wx.ALIGN_LEFT)
+        self.textInputSizer.Add(self.text2D, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.text2DInput, 2, wx.EXPAND)
         self.inputSizer.Add(self.loadBtn, 0, wx.EXPAND)
 
@@ -234,7 +234,7 @@ class CanvasPanel(wx.Panel):
         try:
             print 'showing zData'
             self.axes2D.matshow(self.zData)
-            self.plot1D.draw()
+            self.plot.draw()
             #Z = np.arange(64).reshape(8,8)
             #self.axes2D.matshow(Z)
         except AttributeError:
