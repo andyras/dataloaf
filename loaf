@@ -14,6 +14,28 @@ from matplotlib.figure import Figure
 import wx
 import glob
 
+class Datum(object):
+    '''
+    A data point; there is one for every point on the 2D data plot.  This object
+    stores information about the data as well as filenames.
+    '''
+    def __init__(self, xIdx, yIdx, x, y):
+        self.xIdx = xIdx
+        self.yIdx = yIdx
+        self.x = x[0]
+        self.xStr = x[1]
+        self.y = y[0]
+        self.yStr = y[1]
+        self.z = 0.0
+        self.file1D = None
+        self.file2D = None
+
+    def __str__(self):
+        retStr = '(%d, %d): (%f, %f, %f)\n' % (self.xIdx, self.yIdx, self.x, self.y, self.z)
+        retStr += '1D file: %s\n' % self.file1D
+        retStr += '2D file: %s\n' % self.file2D
+        return retStr
+
 class mainFrame(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self, parent=None, title='Main frame', size=(1000,600), pos=(50,50))
@@ -129,6 +151,54 @@ class CanvasPanel(wx.Panel):
         if (debug):
             print globber
             print globs
+
+        # sets of x and y points
+        xpts = set([])
+        ypts = set([])
+
+        for glb in globs:
+            # index of midPath will be after basePath
+            midIdx = glb.find(midPath, len(basePath))
+            # index of endPath will be after midPath
+            if (endPath == ''):
+                endIdx = len(glb)
+            else:
+                endIdx = glb.find(endPath, midIdx+len(midPath))
+            # between basePath and midPath is x datum
+            xpts.add(glb[len(basePath):midIdx])
+            # between midPath and endPath is y datum
+            ypts.add(glb[midIdx+len(midPath):endIdx])
+
+        if (debug):
+            print 'xpts:', xpts
+            print 'ypts:', ypts
+
+        # map of x, y value to file string
+        self.xData = []
+        for x in xpts:
+            self.xData.append((float(x), x))
+
+        self.yData = []
+        for y in ypts:
+            self.yData.append((float(y), y))
+
+        if (debug):
+            print 'xData:', self.xData
+            print 'yData:', self.yData
+
+        dataMap = {}
+        for ii in range(len(self.xData)):
+            for jj in range(len(self.yData)):
+                dataMap[(ii, jj)] = Datum(ii, jj, self.xData[ii], self.yData[jj])
+
+        for datum in dataMap.values():
+            print datum
+
+        #self.xData = np.array(list(xpts))
+        #self.xData.sort()
+        #self.yData = np.array(list(ypts))
+        #self.yData.sort()
+
 
     def drawPlot1D(self, fileName=None):
         if (fileName):
