@@ -76,14 +76,21 @@ class CanvasPanel(wx.Panel):
         self.endText = wx.StaticText(self, -1, "end of pathname")
         self.text1D = wx.StaticText(self, -1, "1D data file")
         self.text2D = wx.StaticText(self, -1, "2D data file")
-        self.baseInput = wx.TextCtrl(self, -1, "")
-        self.middleInput = wx.TextCtrl(self, -1, "")
-        self.endInput = wx.TextCtrl(self, -1, "")
-        self.text1DInput = wx.TextCtrl(self, -1, "")
-        self.text2DInput = wx.TextCtrl(self, -1, "")
+        if (debug):
+            self.baseInput = wx.TextCtrl(self, -1, "./data/d1_")
+            self.middleInput = wx.TextCtrl(self, -1, "_d2_")
+            self.endInput = wx.TextCtrl(self, -1, "")
+            self.text1DInput = wx.TextCtrl(self, -1, "pts.dat")
+            self.text2DInput = wx.TextCtrl(self, -1, "dat.dat")
+        else:
+            self.baseInput = wx.TextCtrl(self, -1, "")
+            self.middleInput = wx.TextCtrl(self, -1, "")
+            self.endInput = wx.TextCtrl(self, -1, "")
+            self.text1DInput = wx.TextCtrl(self, -1, "")
+            self.text2DInput = wx.TextCtrl(self, -1, "")
 
-        loadBtn = wx.Button(self, -1, "Load Data")
-        self.Bind(wx.EVT_BUTTON, self.onLoad, id=loadBtn.GetId())
+        self.loadBtn = wx.Button(self, -1, "Load Data")
+        self.Bind(wx.EVT_BUTTON, self.onLoad, id=self.loadBtn.GetId())
 
         #### add objects to sizers
 
@@ -98,7 +105,7 @@ class CanvasPanel(wx.Panel):
         self.textInputSizer.Add(self.text1DInput, 2, wx.EXPAND)
         self.textInputSizer.Add(self.text2D, 1, wx.ALIGN_LEFT)
         self.textInputSizer.Add(self.text2DInput, 2, wx.EXPAND)
-        self.inputSizer.Add(loadBtn, 0, wx.EXPAND)
+        self.inputSizer.Add(self.loadBtn, 0, wx.EXPAND)
 
         #### set sizer for panel
 
@@ -153,5 +160,8 @@ if __name__ == "__main__":
     panel = CanvasPanel(fr)
     fr.Show()
     # start with focus on first input text box
-    panel.baseInput.SetFocus()
+    if (debug):
+        panel.loadBtn.SetFocus()
+    else:
+        panel.baseInput.SetFocus()
     app.MainLoop()
