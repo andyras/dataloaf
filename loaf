@@ -16,7 +16,7 @@ import glob
 
 class mainFrame(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent=None, title='Main frame', size=(800,600))
+        wx.Frame.__init__(self, parent=None, title='Main frame', size=(1000,600))
 
         #### make menu bar and menu
 
