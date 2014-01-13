@@ -74,12 +74,14 @@ class CanvasPanel(wx.Panel):
         self.plotSizer = wx.BoxSizer(wx.VERTICAL)
         self.inputSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.textInputSizer = wx.GridSizer(0, 2, 5, 5)
+        self.buttonSizer = wx.BoxSizer(wx.VERTICAL)
 
         #### add sizers to each other
 
         self.topSizer.Add(self.plotSizer, 1, wx.EXPAND)
         self.topSizer.Add(self.inputSizer, 0, wx.EXPAND)
         self.inputSizer.Add(self.textInputSizer, 1, wx.EXPAND)
+        self.inputSizer.Add(self.buttonSizer, 0, wx.EXPAND)
 
         #### make objects
 
@@ -89,7 +91,7 @@ class CanvasPanel(wx.Panel):
         self.axes2D = self.figure.add_subplot(gs[0])
         self.axes1D = self.figure.add_subplot(gs[1])
         self.plot = FigureCanvas(self, -1, self.figure)
-        self.drawPlot1D('data/d1_1_d2_1/pts.dat')
+        self.drawPlot1D()
         self.drawPlot2D()
         # bind clicking on plot
         self.plot.mpl_connect('button_press_event', self.onPlotClick)
@@ -116,6 +118,9 @@ class CanvasPanel(wx.Panel):
         self.loadBtn = wx.Button(self, -1, "Load Data")
         self.Bind(wx.EVT_BUTTON, self.onLoad, id=self.loadBtn.GetId())
 
+        self.resetBtn = wx.Button(self, -1, "Reset 1D Plot")
+        self.Bind(wx.EVT_BUTTON, self.onReset, id=self.resetBtn.GetId())
+
         #### add objects to sizers
 
         self.plotSizer.Add(self.plot, 1, wx.EXPAND)
@@ -129,7 +134,8 @@ class CanvasPanel(wx.Panel):
         self.textInputSizer.Add(self.text1DInput, 2, wx.EXPAND)
         self.textInputSizer.Add(self.text2D, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.text2DInput, 2, wx.EXPAND)
-        self.inputSizer.Add(self.loadBtn, 0, wx.EXPAND)
+        self.buttonSizer.Add(self.loadBtn, 0, wx.EXPAND)
+        self.buttonSizer.Add(self.resetBtn, 0, wx.EXPAND)
 
         #### set sizer for panel
 
@@ -217,14 +223,18 @@ class CanvasPanel(wx.Panel):
         # refresh 2D plot
         self.drawPlot2D()
 
+    def onReset(self, e):
+        '''
+        Reset the 1D plot
+        '''
+        self.drawPlot1D()
+
     def drawPlot1D(self, fileName=None):
         if (fileName):
             data = np.loadtxt(fileName)
             self.axes1D.plot(data[:,0], data[:,1])
         else:
-            t = np.arange(0.0, 3.0, 0.01)
-            s = np.sin(2 * np.pi * t)
-            self.axes2D.plot(t, s)
+            self.axes1D.cla()
         self.plot.draw()
 
     def drawPlot2D(self):
