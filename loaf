@@ -47,8 +47,8 @@ class mainFrame(wx.Frame):
         self.filemenu = wx.Menu()
         self.exitId, self.aboutId = wx.NewId(), wx.NewId()
         # TODO: why do these texts/shortcuts not show up in the same way in the actual menu?
-        self.menuAbout = self.filemenu.Append(id=self.aboutId, text='About\tCtrl+a', help='Informations')
-        self.menuExit = self.filemenu.Append(id=self.exitId, text='Exit\tCtrl+w', help='Quit')
+        self.menuAbout = self.filemenu.Append(id=-1, text='About\tCtrl+a', help='Informations')
+        self.menuExit = self.filemenu.Append(id=-1, text='Exit\tCtrl+w', help='Quit')
         self.menuLoad = self.filemenu.Append(id=-1, text='Load data\tCtrl+l', help='Load data')
         self.menuReset = self.filemenu.Append(id=-1, text='Reset 1D plot\tCtrl+r', help='Reset 1D plot')
 
@@ -60,7 +60,6 @@ class mainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onExit, source=self.menuExit)
         self.Bind(wx.EVT_MENU, self.panel.onLoad, source=self.menuLoad)
         self.Bind(wx.EVT_MENU, self.panel.onReset, source=self.menuReset)
-        
 
     def onAbout(self, e):
         dlg = wx.MessageDialog(self, 'A data explorer.', 'About the data explorer', wx.OK)
@@ -70,10 +69,11 @@ class mainFrame(wx.Frame):
     def onExit(self, e):
         self.Close(True)
 
-
 class CanvasPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+
+        self.zData = np.arange(100).reshape(10,10)
 
         #### make sizers
 
@@ -237,16 +237,22 @@ class CanvasPanel(wx.Panel):
         self.drawPlot1D()
 
     def drawPlot1D(self, fileName=None):
+        '''
+        Plot 1D data if the file exists
+        '''
         if (fileName):
-            data = np.loadtxt(fileName)
-            self.axes1D.plot(data[:,0], data[:,1])
+            try:
+                data = np.loadtxt(fileName)
+                self.axes1D.plot(data[:,0], data[:,1])
+            except IOError:
+                if (debug):
+                    print 'file %s does not exist, not plotting.' % fileName
         else:
             self.axes1D.cla()
         self.plot.draw()
 
     def drawPlot2D(self):
         try:
-            print 'showing zData'
             self.axes2D.matshow(self.zData)
             #Z = np.arange(64).reshape(8,8)
             #self.axes2D.matshow(Z)
@@ -267,7 +273,6 @@ class CanvasPanel(wx.Panel):
                 print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
                     e.button, e.x, e.y, e.xdata, e.ydata)
                 print xIdx, yIdx
-            # TODO handle file not existing
             self.drawPlot1D(self.dataMap[(xIdx, yIdx)].file1D)
 
 if __name__ == "__main__":
@@ -275,8 +280,5 @@ if __name__ == "__main__":
     fr = mainFrame(None)
     fr.Show()
     # start with focus on first input text box
-    if (debug):
-        fr.panel.loadBtn.SetFocus()
-    else:
-        fr.panel.baseInput.SetFocus()
+    fr.panel.baseInput.SetFocus()
     app.MainLoop()
