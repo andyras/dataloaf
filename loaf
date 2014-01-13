@@ -16,7 +16,7 @@ import glob
 
 class mainFrame(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent=None, title='Main frame', size=(1000,600))
+        wx.Frame.__init__(self, parent=None, title='Main frame', size=(1000,600), pos=(50,50))
 
         #### make menu bar and menu
 
@@ -125,10 +125,10 @@ class CanvasPanel(wx.Panel):
         endPath = self.endInput.GetValue()
 
         globber = basePath + '*' + midPath + '*' + endPath
+        globs = glob.glob(globber)
         if (debug):
             print globber
-        globs = glob.glob(globber)
-        print globs
+            print globs
 
     def drawPlot1D(self, fileName=None):
         if (fileName):
