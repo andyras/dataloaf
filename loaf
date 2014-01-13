@@ -130,9 +130,6 @@ class CanvasPanel(wx.Panel):
         globs = glob.glob(globber)
         print globs
 
-    def getDirs(self, basePath, midPath, endPath):
-        pass
-
     def drawPlot1D(self, fileName=None):
         if (fileName):
             data = np.loadtxt(fileName)
