@@ -91,6 +91,8 @@ class CanvasPanel(wx.Panel):
         self.plot = FigureCanvas(self, -1, self.figure)
         self.drawPlot1D('data/d1_1_d2_1/pts.dat')
         self.drawPlot2D()
+        # bind clicking on plot
+        self.plot.mpl_connect('button_press_event', self.onPlotClick)
 
         # text input objects
         self.baseText = wx.StaticText(self, -1, "base pathname")
@@ -215,12 +217,6 @@ class CanvasPanel(wx.Panel):
         # refresh 2D plot
         self.drawPlot2D()
 
-        #self.xData = np.array(list(xpts))
-        #self.xData.sort()
-        #self.yData = np.array(list(ypts))
-        #self.yData.sort()
-
-
     def drawPlot1D(self, fileName=None):
         if (fileName):
             data = np.loadtxt(fileName)
@@ -243,6 +239,10 @@ class CanvasPanel(wx.Panel):
             Z = np.arange(100).reshape(10,10)
             self.axes2D.matshow(Z)
 
+    def onPlotClick(self, e):
+        if (e.inaxes == self.axes2D):
+            print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
+                e.button, e.x, e.y, e.xdata, e.ydata)
 
 if __name__ == "__main__":
     app = wx.App(False)
