@@ -191,7 +191,7 @@ class CanvasPanel(wx.Panel):
         self.yDim = len(self.yData)
         self.zData = np.zeros(self.xDim*self.yDim).reshape(self.xDim, self.yDim)
 
-        dataMap = {}
+        self.dataMap = {}
         for ii in range(len(self.xData)):
             for jj in range(len(self.yData)):
                 # create datum object
@@ -204,13 +204,13 @@ class CanvasPanel(wx.Panel):
                 except IOError:
                     if (debug):
                         print 'loading from %s failed: file does not exist' % datum.file2D
-                dataMap[(ii, jj)] = datum
+                self.dataMap[(ii, jj)] = datum
 
                 # add to zData matrix
                 self.zData[ii, jj] = datum.z
 
         if (debug):
-            for datum in dataMap.values():
+            for datum in self.dataMap.values():
                 print datum
             print self.zData
 
@@ -225,12 +225,12 @@ class CanvasPanel(wx.Panel):
             t = np.arange(0.0, 3.0, 0.01)
             s = np.sin(2 * np.pi * t)
             self.axes2D.plot(t, s)
+        self.plot.draw()
 
     def drawPlot2D(self):
         try:
             print 'showing zData'
             self.axes2D.matshow(self.zData)
-            self.plot.draw()
             #Z = np.arange(64).reshape(8,8)
             #self.axes2D.matshow(Z)
         except AttributeError:
@@ -238,11 +238,20 @@ class CanvasPanel(wx.Panel):
                 print 'There is no self.zData matrix'
             Z = np.arange(100).reshape(10,10)
             self.axes2D.matshow(Z)
+        self.plot.draw()
 
     def onPlotClick(self, e):
+        '''
+        On click on 2D plot, update the 1D plot with the appropriate data file
+        '''
         if (e.inaxes == self.axes2D):
-            print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
-                e.button, e.x, e.y, e.xdata, e.ydata)
+            xIdx, yIdx = int(round(e.xdata)), int(round(e.ydata))
+            if (debug):
+                print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
+                    e.button, e.x, e.y, e.xdata, e.ydata)
+                print xIdx, yIdx
+            # TODO handle file not existing
+            self.drawPlot1D(self.dataMap[(xIdx, yIdx)].file1D)
 
 if __name__ == "__main__":
     app = wx.App(False)
