@@ -185,9 +185,9 @@ class CanvasPanel(wx.Panel):
             print 'xData:', self.xData
             print 'yData:', self.yData
 
-        xDim = len(self.xData)
-        yDim = len(self.yData)
-        zData = np.zeros(xDim*yDim).reshape(xDim, yDim)
+        self.xDim = len(self.xData)
+        self.yDim = len(self.yData)
+        self.zData = np.zeros(self.xDim*self.yDim).reshape(self.xDim, self.yDim)
 
         dataMap = {}
         for ii in range(len(self.xData)):
@@ -205,11 +205,15 @@ class CanvasPanel(wx.Panel):
                 dataMap[(ii, jj)] = datum
 
                 # add to zData matrix
-                zData[ii, jj] = datum.z
+                self.zData[ii, jj] = datum.z
 
         if (debug):
             for datum in dataMap.values():
                 print datum
+            print self.zData
+
+        # refresh 2D plot
+        self.drawPlot2D()
 
         #self.xData = np.array(list(xpts))
         #self.xData.sort()
@@ -226,14 +230,16 @@ class CanvasPanel(wx.Panel):
             s = np.sin(2 * np.pi * t)
             self.axes2D.plot(t, s)
 
-    def drawPlot2D(self, fileName=None):
-        if (fileName):
-            data = np.loadtxt(fileName)
-            self.axes2D.plot(data[:,0], data[:,1])
-        else:
-            xdata = np.arange(10)
-            ydata = np.arange(10)
-            X, Y = np.meshgrid(xdata, ydata)
+    def drawPlot2D(self):
+        try:
+            print 'showing zData'
+            self.axes2D.matshow(self.zData)
+            self.plot1D.draw()
+            #Z = np.arange(64).reshape(8,8)
+            #self.axes2D.matshow(Z)
+        except AttributeError:
+            if (debug):
+                print 'There is no self.zData matrix'
             Z = np.arange(100).reshape(10,10)
             self.axes2D.matshow(Z)
 
