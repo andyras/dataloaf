@@ -136,10 +136,9 @@ class CanvasPanel(wx.Panel):
 
     def onLoad(self, e):
         '''
-        1. Regex to find directories with data
+        1. Glob to find directories with data
          a. Assume rectangular data set, i.e. all y values for all x values
-        2. Find which files exist
-        3. Add files to map, read 2D data into array
+        2. Add (x,y) data file names to map, read 2D data into array
         '''
 
         basePath = self.baseInput.GetValue()
@@ -186,13 +185,31 @@ class CanvasPanel(wx.Panel):
             print 'xData:', self.xData
             print 'yData:', self.yData
 
+        xDim = len(self.xData)
+        yDim = len(self.yData)
+        zData = np.zeros(xDim*yDim).reshape(xDim, yDim)
+
         dataMap = {}
         for ii in range(len(self.xData)):
             for jj in range(len(self.yData)):
-                dataMap[(ii, jj)] = Datum(ii, jj, self.xData[ii], self.yData[jj])
+                # create datum object
+                datum = Datum(ii, jj, self.xData[ii], self.yData[jj])
+                datumPath = basePath + datum.xStr + midPath + datum.yStr + endPath + '/'
+                datum.file1D = datumPath + self.text1DInput.GetValue()
+                datum.file2D = datumPath + self.text2DInput.GetValue()
+                try:
+                    datum.z = np.loadtxt(datum.file2D)
+                except IOError:
+                    if (debug):
+                        print 'loading from %s failed: file does not exist' % datum.file2D
+                dataMap[(ii, jj)] = datum
 
-        for datum in dataMap.values():
-            print datum
+                # add to zData matrix
+                zData[ii, jj] = datum.z
+
+        if (debug):
+            for datum in dataMap.values():
+                print datum
 
         #self.xData = np.array(list(xpts))
         #self.xData.sort()
