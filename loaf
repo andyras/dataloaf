@@ -331,7 +331,7 @@ class CanvasPanel(wx.Panel):
         else:
             try:
                 # assign filename to current datum
-                fileName = self.dataMap[(self.xIdx, self.yIdx)].file1D
+                fileName = self.getCurrentDatum().file1D
                 try:
                     # load/plot data file
                     data = np.loadtxt(fileName)
@@ -395,7 +395,7 @@ class CanvasPanel(wx.Panel):
         Set the output text data according to one datum.
         '''
         try:
-            datum = self.dataMap[(self.xIdx, self.yIdx)]
+            datum = self.getCurrentDatum()
             self.xIdxTextOut.SetValue(str(datum.xIdx))
             self.yIdxTextOut.SetValue(str(datum.yIdx))
             self.xTextOut.SetValue(str(datum.x))
@@ -426,14 +426,6 @@ class CanvasPanel(wx.Panel):
         Basic plotting action: plots 1D data, and updates highlight on 2D plot.
         Defaults to plotting datum at current position on 2D grid.
         '''
-        idx = (self.xIdx, self.yIdx)
-
-        try:
-            datum = self.dataMap[idx]
-        except:
-            if (debug):
-                print 'Datum does not exist, not updating plot.'
-            return
 
         # update 1D plot
         plt = self.drawPlot1D()
@@ -443,6 +435,17 @@ class CanvasPanel(wx.Panel):
 
         # update output text
         self.setOutData()
+
+    def getCurrentDatum(self):
+        '''
+        Returns current datum based on indices
+        '''
+        try:
+            return self.dataMap[(self.xIdx, self.yIdx)]
+        except AttributeError:
+            if (debug):
+                'Datum does not exist, returning None'
+            return None
 
 if __name__ == "__main__":
     app = wx.App(False)
