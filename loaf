@@ -74,8 +74,8 @@ class CanvasPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         self.zData = np.arange(100).reshape(10,10)
-        self.xIdx = -1
-        self.yIdx = -1
+        self.xIdx = 0
+        self.yIdx = 0
 
         #### make sizers
 
@@ -272,8 +272,14 @@ class CanvasPanel(wx.Panel):
                 print datum
             print self.zData
 
+        # important to reset indices if loading different data sets
+        self.xIdx, self.yIdx = 0, 0
+
         # refresh 2D plot
         self.drawPlot2D()
+
+        # set focus on plot
+        self.plot.SetFocus()
 
     def onReset(self, e):
         '''
