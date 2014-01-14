@@ -307,7 +307,8 @@ class CanvasPanel(wx.Panel):
         # important to reset indices if loading different data sets
         self.xIdx, self.yIdx = 0, 0
 
-        # refresh 2D plot
+        # refresh plots
+        self.drawPlot1D()
         self.drawPlot2D()
 
         # set focus on plot
@@ -315,9 +316,9 @@ class CanvasPanel(wx.Panel):
 
     def onReset(self, e):
         '''
-        Reset the 1D plot
+        Reset the plots
         '''
-        plt = self.drawPlot1D()
+        self.drawPlot1D()
         self.drawPlot2D()
 
     def drawPlot1D(self, fileName=None):
