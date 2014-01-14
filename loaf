@@ -76,7 +76,6 @@ class CanvasPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-        self.zData = np.arange(100).reshape(10,10)
         self.xIdx = 0
         self.yIdx = 0
 
@@ -105,7 +104,7 @@ class CanvasPanel(wx.Panel):
         self.axes2D = self.figure.add_subplot(gs[0])
         self.axes1D = self.figure.add_subplot(gs[1])
         self.plot = FigureCanvas(self, -1, self.figure)
-        plt = self.drawPlot1D()
+        plt = self.drawPlot1D(True)
         self.drawPlot2D()
         # bind clicking on plot
         self.plot.mpl_connect('button_press_event', self.onPlotClick)
@@ -196,29 +195,25 @@ class CanvasPanel(wx.Panel):
                         self.yIdx += 1
                         if (debug):
                             print 'going one up'
-                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight(plt[0].get_color())
+                        self.plotUpdate()
                 if (e.key == 'right'):
                     if (self.xIdx < (self.xDim - 1)):
                         self.xIdx += 1
                         if (debug):
                             print 'going one right'
-                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight(plt[0].get_color())
+                        self.plotUpdate()
                 if (e.key == 'down'):
                     if (self.yIdx > 0):
                         self.yIdx -= 1
                         if (debug):
                             print 'going one down'
-                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight(plt[0].get_color())
+                        self.plotUpdate()
                 if (e.key == 'left'):
                     if (self.xIdx > 0):
                         self.xIdx -= 1
                         if (debug):
                             print 'going one left'
-                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight(plt[0].get_color())
+                        self.plotUpdate()
             else:
                 if (debug):
                     print 'indices not valid'
@@ -307,9 +302,8 @@ class CanvasPanel(wx.Panel):
         # important to reset indices if loading different data sets
         self.xIdx, self.yIdx = 0, 0
 
-        # refresh plots
-        self.drawPlot1D()
-        self.drawPlot2D()
+        # reset plots
+        self.resetPlots()
 
         # set focus on plot
         self.plot.SetFocus()
@@ -318,67 +312,98 @@ class CanvasPanel(wx.Panel):
         '''
         Reset the plots
         '''
-        self.drawPlot1D()
-        self.drawPlot2D()
+        self.resetPlots()
 
-    def drawPlot1D(self, fileName=None):
+    def resetPlots(self):
+        '''
+        Reset both plots
+        '''
+        self.drawPlot2D()
+        self.drawPlot1D(True)
+        self.plotUpdate()
+
+    def drawPlot1D(self, clear=False):
         '''
         Plot 1D data if the file exists
         '''
-        if (fileName):
-            try:
-                data = np.loadtxt(fileName)
-                plt = self.axes1D.plot(data[:,0], data[:,1])
-            except IOError:
-                if (debug):
-                    print 'file %s does not exist, not plotting.' % fileName
-                return None
+        if (clear):
+            self.axes1D.cla()
         else:
-            plt = self.axes1D.cla()
-        self.figure.tight_layout()
-        self.plot.draw()
+            try:
+                # assign filename to current datum
+                fileName = self.dataMap[(self.xIdx, self.yIdx)].file1D
+                try:
+                    # load/plot data file
+                    data = np.loadtxt(fileName)
+                    plt = self.axes1D.plot(data[:,0], data[:,1])
 
-        return plt
+                    self.figure.tight_layout()
+                    self.plot.draw()
+
+                    return plt
+
+                except IOError:
+                    if (debug):
+                        print 'file %s does not exist, not plotting.' % fileName
+            except AttributeError:
+                if (debug):
+                    print 'datum does not exist, not plotting'
+
+        return None
 
     def drawPlot2D(self):
+        '''
+        Draw 2D plot.  If data not loaded, leave axes clear.
+        '''
+        # always start with a blank axis
+        self.axes2D.cla()
+
+        # plot data if loaded
         try:
-            self.axes2D.cla()
             self.axes2D.matshow(self.zData)
-            self.updateHighlight()
-            self.axes2D.set_xlim([-0.5, self.xDim-0.5])
-            self.axes2D.set_ylim([-0.5, self.yDim-0.5])
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
-            Z = np.arange(100).reshape(10,10)
-            self.axes2D.matshow(Z)
+
         self.figure.tight_layout()
         self.plot.draw()
 
-    def updateHighlight(self, c='black'):
+    def updateHighlight(self, plt):
         '''
         update the position of the marker for the latest plot
         '''
         if (debug):
             print 'Plotting highlight, data index: (%d, %d): ' % (self.xIdx, self.yIdx)
-        self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, mec='white', mew=2, color=c)
+
         try:
-            self.setOutData(self.dataMap[(self.xIdx, self.yIdx)])
-        except:
+            c = plt[0].get_color()
+        except TypeError:
             if (debug):
-                print 'datum does not exist, ignoring title'
-        self.setOutData(self.dataMap[(self.xIdx, self.yIdx)])
+                print '1D plot was not made, defaulting to white circle'
+            c = 'white'
+
+        # add white-bordered circle to 2D plot, reset axis limits
+        self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, mec='white', mew=2, color=c)
+        self.axes2D.set_xlim([-0.5, self.xDim-0.5])
+        self.axes2D.set_ylim([-0.5, self.yDim-0.5])
+
+        # redraw plot
         self.plot.draw()
 
-    def setOutData(self, datum):
+    def setOutData(self):
         '''
         Set the output text data according to one datum.
         '''
-        self.xIdxTextOut.SetValue(str(datum.xIdx))
-        self.yIdxTextOut.SetValue(str(datum.yIdx))
-        self.xTextOut.SetValue(str(datum.x))
-        self.yTextOut.SetValue(str(datum.y))
-        self.zTextOut.SetValue(str(datum.z))
+        try:
+            datum = self.dataMap[(self.xIdx, self.yIdx)]
+            self.xIdxTextOut.SetValue(str(datum.xIdx))
+            self.yIdxTextOut.SetValue(str(datum.yIdx))
+            self.xTextOut.SetValue(str(datum.x))
+            self.yTextOut.SetValue(str(datum.y))
+            self.zTextOut.SetValue(str(datum.z))
+        except:
+            if (debug):
+                print 'datum does not exist, ignoring title'
 
     def onPlotClick(self, e):
         '''
@@ -391,11 +416,33 @@ class CanvasPanel(wx.Panel):
                     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
                         e.button, e.x, e.y, e.xdata, e.ydata)
                     print self.xIdx, self.yIdx
-                plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                self.updateHighlight(plt[0].get_color())
-            except AttributeError:
+                self.plotUpdate()
+            except:
                 if (debug):
-                    print 'Data not loaded, not plotting.'
+                    print 'Clicked data not loaded, not plotting.'
+
+    def plotUpdate(self):
+        '''
+        Basic plotting action: plots 1D data, and updates highlight on 2D plot.
+        Defaults to plotting datum at current position on 2D grid.
+        '''
+        idx = (self.xIdx, self.yIdx)
+
+        try:
+            datum = self.dataMap[idx]
+        except:
+            if (debug):
+                print 'Datum does not exist, not updating plot.'
+            return
+
+        # update 1D plot
+        plt = self.drawPlot1D()
+
+        # update highlight
+        self.updateHighlight(plt)
+
+        # update output text
+        self.setOutData()
 
 if __name__ == "__main__":
     app = wx.App(False)
