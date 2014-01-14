@@ -3,7 +3,7 @@
 xs=(0.1 1.0 2.0)
 ys=(0.1 1.0 2.0)
 
-datadir=data2
+datadir=data
 [ -d ${datadir} ] && rm -rf ${datadir}
 mkdir -p ${datadir}
 
