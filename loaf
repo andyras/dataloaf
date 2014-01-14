@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-debug = False
+debug = True
 
 import numpy as np
 import matplotlib as mp
@@ -36,9 +36,12 @@ class Datum(object):
         retStr += '2D file: %s\n' % self.file2D
         return retStr
 
+    def getTitle(self):
+        return 'Data point (%d, %d):\nvalues (%8.3f, %8.3f, %8.3f)' % (self.xIdx, self.yIdx, self.x, self.y, self.z)
+
 class mainFrame(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent=None, title='Data Loaf', size=(1000,600), pos=(50,50))
+        wx.Frame.__init__(self, parent=None, title='Data Loaf', size=(900,600), pos=(50,50))
 
         self.panel = CanvasPanel(self)
 
@@ -82,6 +85,7 @@ class CanvasPanel(wx.Panel):
         self.topSizer = wx.BoxSizer(wx.VERTICAL)
         self.plotSizer = wx.BoxSizer(wx.VERTICAL)
         self.inputSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.textDataSizer = wx.GridSizer(0, 2, 5, 5)
         self.textInputSizer = wx.GridSizer(0, 2, 5, 5)
         self.buttonSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -89,6 +93,7 @@ class CanvasPanel(wx.Panel):
 
         self.topSizer.Add(self.plotSizer, 1, wx.EXPAND)
         self.topSizer.Add(self.inputSizer, 0, wx.EXPAND)
+        self.inputSizer.Add(self.textDataSizer, 0, wx.EXPAND)
         self.inputSizer.Add(self.textInputSizer, 1, wx.EXPAND)
         self.inputSizer.Add(self.buttonSizer, 0, wx.EXPAND)
 
@@ -105,6 +110,18 @@ class CanvasPanel(wx.Panel):
         # bind clicking on plot
         self.plot.mpl_connect('button_press_event', self.onPlotClick)
         self.plot.mpl_connect('key_press_event', self.onKey)
+
+        # text data objects
+        self.xIdxText = wx.StaticText(self, -1, 'x index')
+        self.yIdxText = wx.StaticText(self, -1, 'y index')
+        self.xDataText = wx.StaticText(self, -1, 'x datum')
+        self.yDataText = wx.StaticText(self, -1, 'y datum')
+        self.zDataText = wx.StaticText(self, -1, 'z datum')
+        self.xIdxTextOut = wx.TextCtrl(self, -1, '')
+        self.yIdxTextOut = wx.TextCtrl(self, -1, '')
+        self.xTextOut = wx.TextCtrl(self, -1, '')
+        self.yTextOut = wx.TextCtrl(self, -1, '')
+        self.zTextOut = wx.TextCtrl(self, -1, '')
 
         # text input objects
         self.baseText = wx.StaticText(self, -1, "base pathname")
@@ -133,7 +150,22 @@ class CanvasPanel(wx.Panel):
 
         #### add objects to sizers
 
+        # plot sizer
         self.plotSizer.Add(self.plot, 1, wx.EXPAND)
+
+        # text data sizer
+        self.textDataSizer.Add(self.xIdxText, 0, wx.ALIGN_RIGHT)
+        self.textDataSizer.Add(self.xIdxTextOut, 1, wx.EXPAND)
+        self.textDataSizer.Add(self.yIdxText, 0, wx.ALIGN_RIGHT)
+        self.textDataSizer.Add(self.yIdxTextOut, 1, wx.EXPAND)
+        self.textDataSizer.Add(self.xDataText, 0, wx.ALIGN_RIGHT)
+        self.textDataSizer.Add(self.xTextOut, 1, wx.EXPAND)
+        self.textDataSizer.Add(self.yDataText, 0, wx.ALIGN_RIGHT)
+        self.textDataSizer.Add(self.yTextOut, 1, wx.EXPAND)
+        self.textDataSizer.Add(self.zDataText, 0, wx.ALIGN_RIGHT)
+        self.textDataSizer.Add(self.zTextOut, 1, wx.EXPAND)
+
+        # text input sizer
         self.textInputSizer.Add(self.baseText, 0, wx.ALIGN_RIGHT)
         self.textInputSizer.Add(self.baseInput, 1, wx.EXPAND)
         self.textInputSizer.Add(self.middleText, 0, wx.ALIGN_RIGHT)
@@ -302,6 +334,7 @@ class CanvasPanel(wx.Panel):
                 return None
         else:
             plt = self.axes1D.cla()
+        self.figure.tight_layout()
         self.plot.draw()
 
         return plt
@@ -318,6 +351,7 @@ class CanvasPanel(wx.Panel):
                 print 'There is no self.zData matrix'
             Z = np.arange(100).reshape(10,10)
             self.axes2D.matshow(Z)
+        self.figure.tight_layout()
         self.plot.draw()
 
     def updateHighlight(self, c='black'):
@@ -327,7 +361,23 @@ class CanvasPanel(wx.Panel):
         if (debug):
             print 'Plotting highlight, data index: (%d, %d): ' % (self.xIdx, self.yIdx)
         self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, mec='white', mew=2, color=c)
+        try:
+            self.setOutData(self.dataMap[(self.xIdx, self.yIdx)])
+        except:
+            if (debug):
+                print 'datum does not exist, ignoring title'
+        self.setOutData(self.dataMap[(self.xIdx, self.yIdx)])
         self.plot.draw()
+
+    def setOutData(self, datum):
+        '''
+        Set the output text data according to one datum.
+        '''
+        self.xIdxTextOut.SetValue(str(datum.xIdx))
+        self.yIdxTextOut.SetValue(str(datum.yIdx))
+        self.xTextOut.SetValue(str(datum.x))
+        self.yTextOut.SetValue(str(datum.y))
+        self.zTextOut.SetValue(str(datum.z))
 
     def onPlotClick(self, e):
         '''
