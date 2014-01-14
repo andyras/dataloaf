@@ -360,7 +360,7 @@ class CanvasPanel(wx.Panel):
 
         # plot data if loaded
         try:
-            self.axes2D.matshow(self.zData)
+            self.axes2D.imshow(self.zData, interpolation='none')
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
