@@ -38,7 +38,7 @@ class Datum(object):
 
 class mainFrame(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self, parent=None, title='Main frame', size=(1000,600), pos=(50,50))
+        wx.Frame.__init__(self, parent=None, title='Data Loaf', size=(1000,600), pos=(50,50))
 
         self.panel = CanvasPanel(self)
 
@@ -100,7 +100,7 @@ class CanvasPanel(wx.Panel):
         self.axes2D = self.figure.add_subplot(gs[0])
         self.axes1D = self.figure.add_subplot(gs[1])
         self.plot = FigureCanvas(self, -1, self.figure)
-        self.drawPlot1D()
+        plt = self.drawPlot1D()
         self.drawPlot2D()
         # bind clicking on plot
         self.plot.mpl_connect('button_press_event', self.onPlotClick)
@@ -164,29 +164,29 @@ class CanvasPanel(wx.Panel):
                         self.yIdx += 1
                         if (debug):
                             print 'going one up'
-                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight()
+                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight(plt[0].get_color())
                 if (e.key == 'right'):
                     if (self.xIdx < (self.xDim - 1)):
                         self.xIdx += 1
                         if (debug):
                             print 'going one right'
-                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight()
+                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight(plt[0].get_color())
                 if (e.key == 'down'):
                     if (self.yIdx > 0):
                         self.yIdx -= 1
                         if (debug):
                             print 'going one down'
-                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight()
+                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight(plt[0].get_color())
                 if (e.key == 'left'):
                     if (self.xIdx > 0):
                         self.xIdx -= 1
                         if (debug):
                             print 'going one left'
-                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                        self.updateHighlight()
+                        plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight(plt[0].get_color())
             else:
                 if (debug):
                     print 'indices not valid'
@@ -279,7 +279,8 @@ class CanvasPanel(wx.Panel):
         '''
         Reset the 1D plot
         '''
-        self.drawPlot1D()
+        plt = self.drawPlot1D()
+        self.drawPlot2D()
 
     def drawPlot1D(self, fileName=None):
         '''
@@ -288,13 +289,16 @@ class CanvasPanel(wx.Panel):
         if (fileName):
             try:
                 data = np.loadtxt(fileName)
-                self.axes1D.plot(data[:,0], data[:,1])
+                plt = self.axes1D.plot(data[:,0], data[:,1])
             except IOError:
                 if (debug):
                     print 'file %s does not exist, not plotting.' % fileName
+                return None
         else:
-            self.axes1D.cla()
+            plt = self.axes1D.cla()
         self.plot.draw()
+
+        return plt
 
     def drawPlot2D(self):
         try:
@@ -310,12 +314,12 @@ class CanvasPanel(wx.Panel):
             self.axes2D.matshow(Z)
         self.plot.draw()
 
-    def updateHighlight(self):
+    def updateHighlight(self, c='black'):
         '''
         update the position of the marker for the latest plot
         '''
         print self.xIdx, self.yIdx
-        self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, color='black', visible=True)
+        self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, mec='white', mew=2, color=c)
         self.plot.draw()
 
     def onPlotClick(self, e):
@@ -329,8 +333,8 @@ class CanvasPanel(wx.Panel):
                     print 'button=%d, x=%d, y=%d, xdata=%f, ydata=%f'%(
                         e.button, e.x, e.y, e.xdata, e.ydata)
                     print self.xIdx, self.yIdx
-                self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
-                self.updateHighlight()
+                plt = self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                self.updateHighlight(plt[0].get_color())
             except AttributeError:
                 if (debug):
                     print 'Data not loaded, not plotting.'
