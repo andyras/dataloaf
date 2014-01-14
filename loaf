@@ -160,21 +160,33 @@ class CanvasPanel(wx.Panel):
             # make sure plot has been clicked
             if ((self.xIdx > -1) and (self.yIdx > -1)):
                 if (e.key == 'up'):
-                    if (self.yIdx > 0):
-                        self.yIdx -= 1
-                        print 'going one up'
+                    if (self.yIdx < (self.yDim - 1)):
+                        self.yIdx += 1
+                        if (debug):
+                            print 'going one up'
+                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight()
                 if (e.key == 'right'):
                     if (self.xIdx < (self.xDim - 1)):
                         self.xIdx += 1
-                        print 'going one right'
+                        if (debug):
+                            print 'going one right'
+                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight()
                 if (e.key == 'down'):
-                    if (self.yIdx < (self.yDim - 1)):
-                        self.yIdx += 1
-                        print 'going one down'
+                    if (self.yIdx > 0):
+                        self.yIdx -= 1
+                        if (debug):
+                            print 'going one down'
+                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight()
                 if (e.key == 'left'):
                     if (self.xIdx > 0):
                         self.xIdx -= 1
-                        print 'going one left'
+                        if (debug):
+                            print 'going one left'
+                        self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                        self.updateHighlight()
             else:
                 if (debug):
                     print 'indices not valid'
@@ -286,14 +298,24 @@ class CanvasPanel(wx.Panel):
 
     def drawPlot2D(self):
         try:
+            self.axes2D.cla()
             self.axes2D.matshow(self.zData)
-            #Z = np.arange(64).reshape(8,8)
-            #self.axes2D.matshow(Z)
+            self.updateHighlight()
+            self.axes2D.set_xlim([-0.5, self.xDim-0.5])
+            self.axes2D.set_ylim([-0.5, self.yDim-0.5])
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
             Z = np.arange(100).reshape(10,10)
             self.axes2D.matshow(Z)
+        self.plot.draw()
+
+    def updateHighlight(self):
+        '''
+        update the position of the marker for the latest plot
+        '''
+        print self.xIdx, self.yIdx
+        self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, color='black', visible=True)
         self.plot.draw()
 
     def onPlotClick(self, e):
@@ -308,6 +330,7 @@ class CanvasPanel(wx.Panel):
                         e.button, e.x, e.y, e.xdata, e.ydata)
                     print self.xIdx, self.yIdx
                 self.drawPlot1D(self.dataMap[(self.xIdx, self.yIdx)].file1D)
+                self.updateHighlight()
             except AttributeError:
                 if (debug):
                     print 'Data not loaded, not plotting.'
