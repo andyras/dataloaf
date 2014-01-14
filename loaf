@@ -129,8 +129,8 @@ class CanvasPanel(wx.Panel):
         self.text1D = wx.StaticText(self, -1, "1D data file")
         self.text2D = wx.StaticText(self, -1, "2D data file")
         if (debug):
-            self.baseInput = wx.TextCtrl(self, -1, "./data/d1_")
-            self.middleInput = wx.TextCtrl(self, -1, "_d2_")
+            self.baseInput = wx.TextCtrl(self, -1, "./data/x")
+            self.middleInput = wx.TextCtrl(self, -1, "_y")
             self.endInput = wx.TextCtrl(self, -1, "")
             self.text1DInput = wx.TextCtrl(self, -1, "pts.dat")
             self.text2DInput = wx.TextCtrl(self, -1, "dat.dat")
