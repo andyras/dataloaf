@@ -48,9 +48,8 @@ class mainFrame(wx.Frame):
         #### make menu bar and menu
 
         self.filemenu = wx.Menu()
-        self.exitId, self.aboutId = wx.NewId(), wx.NewId()
+        self.exitId = wx.NewId()
         # TODO: why do these texts/shortcuts not show up in the same way in the actual menu?
-        self.menuAbout = self.filemenu.Append(id=-1, text='About\tCtrl+a', help='Informations')
         self.menuExit = self.filemenu.Append(id=-1, text='Exit\tCtrl+w', help='Quit')
         self.menuLoad = self.filemenu.Append(id=-1, text='Load data\tCtrl+l', help='Load data')
         self.menuReset = self.filemenu.Append(id=-1, text='Reset 1D plot\tCtrl+r', help='Reset 1D plot')
@@ -59,15 +58,9 @@ class mainFrame(wx.Frame):
         self.menubar.Append(self.filemenu, title='File')
         self.SetMenuBar(self.menubar)
 
-        self.Bind(wx.EVT_MENU, self.onAbout, source=self.menuAbout)
         self.Bind(wx.EVT_MENU, self.onExit, source=self.menuExit)
         self.Bind(wx.EVT_MENU, self.panel.onLoad, source=self.menuLoad)
         self.Bind(wx.EVT_MENU, self.panel.onReset, source=self.menuReset)
-
-    def onAbout(self, e):
-        dlg = wx.MessageDialog(self, 'A data explorer.', 'About the data explorer', wx.OK)
-        dlg.ShowModal()
-        dlg.Destroy()
 
     def onExit(self, e):
         self.Close(True)
@@ -284,11 +277,14 @@ class CanvasPanel(wx.Panel):
                 datumPath = basePath + datum.xStr + midPath + datum.yStr + endPath + '/'
                 datum.file1D = datumPath + self.text1DInput.GetValue()
                 datum.file2D = datumPath + self.text2DInput.GetValue()
-                try:
-                    datum.z = np.loadtxt(datum.file2D)
-                except IOError:
-                    if (debug):
-                        print 'loading from %s failed: file does not exist' % datum.file2D
+                if (datum.file2D != ''):
+                    try:
+                        datum.z = np.loadtxt(datum.file2D)
+                    except IOError:
+                        if (debug):
+                            print 'loading from %s failed: file does not exist' % datum.file2D
+                else:
+                    datum.z = np.array([0.0])
                 self.dataMap[(ii, jj)] = datum
 
                 # add to zData matrix
