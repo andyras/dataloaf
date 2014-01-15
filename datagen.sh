@@ -1,7 +1,7 @@
 #!/bin/bash
 
-xs=(0.1 1.0 2.0)
-ys=(0.1 1.0 2.0)
+xs=(0.1 0.0001 2.0)
+ys=(0.1 0.001 1.0)
 
 datadir=data
 [ -d ${datadir} ] && rm -rf ${datadir}

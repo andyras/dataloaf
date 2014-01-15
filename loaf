@@ -254,12 +254,14 @@ class CanvasPanel(wx.Panel):
 
         # map of x, y value to file string
         self.xData = []
-        for x in sorted(list(xpts)):
+        for x in list(xpts):
             self.xData.append((float(x), x))
+        self.xData.sort()
 
         self.yData = []
-        for y in sorted(list(ypts)):
+        for y in list(ypts):
             self.yData.append((float(y), y))
+        self.yData.sort()
 
         if (debug):
             print 'xData:', self.xData
