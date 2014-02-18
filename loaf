@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-debug = True
+debug = False
 
 import numpy as np
 import matplotlib as mp
@@ -11,8 +11,11 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.figure import Figure
 
+import os
 import wx
 import glob
+
+loafrc = os.getenv("HOME")+"/.loafrc"
 
 class Datum(object):
     '''
@@ -128,11 +131,30 @@ class CanvasPanel(wx.Panel):
             self.text1DInput = wx.TextCtrl(self, -1, "pts.dat")
             self.text2DInput = wx.TextCtrl(self, -1, "dat.dat")
         else:
-            self.baseInput = wx.TextCtrl(self, -1, "")
-            self.middleInput = wx.TextCtrl(self, -1, "")
-            self.endInput = wx.TextCtrl(self, -1, "")
-            self.text1DInput = wx.TextCtrl(self, -1, "")
-            self.text2DInput = wx.TextCtrl(self, -1, "")
+            # check if last parameters were saved in .loafrc
+            try:
+                with open(loafrc, "r") as i:
+                    lines = i.readlines()
+                    self.baseInput = wx.TextCtrl(self, -1, lines[0].strip())
+                    self.middleInput = wx.TextCtrl(self, -1, lines[1].strip())
+                    self.endInput = wx.TextCtrl(self, -1, lines[2].strip())
+                    self.text1DInput = wx.TextCtrl(self, -1, lines[3].strip())
+                    self.text2DInput = wx.TextCtrl(self, -1, lines[4].strip())
+            # default to blank entry fields
+            except IOError:
+                print("WARNING: ~/.loafrc does not exist")
+                self.baseInput = wx.TextCtrl(self, -1, "")
+                self.middleInput = wx.TextCtrl(self, -1, "")
+                self.endInput = wx.TextCtrl(self, -1, "")
+                self.text1DInput = wx.TextCtrl(self, -1, "")
+                self.text2DInput = wx.TextCtrl(self, -1, "")
+            except IndexError:
+                print("WARNING: ~/.loafrc corrupted or empty")
+                self.baseInput = wx.TextCtrl(self, -1, "")
+                self.middleInput = wx.TextCtrl(self, -1, "")
+                self.endInput = wx.TextCtrl(self, -1, "")
+                self.text1DInput = wx.TextCtrl(self, -1, "")
+                self.text2DInput = wx.TextCtrl(self, -1, "")
 
         self.loadBtn = wx.Button(self, -1, "Load Data")
         self.Bind(wx.EVT_BUTTON, self.onLoad, id=self.loadBtn.GetId())
@@ -305,6 +327,17 @@ class CanvasPanel(wx.Panel):
 
         # set focus on plot
         self.plot.SetFocus()
+
+        # update .loafrc
+        try:
+            with open(loafrc, "w") as f:
+                f.write(self.baseInput.GetValue()+"\n")
+                f.write(self.middleInput.GetValue()+"\n")
+                f.write(self.endInput.GetValue()+"\n")
+                f.write(self.text1DInput.GetValue()+"\n")
+                f.write(self.text2DInput.GetValue()+"\n")
+        except IOError:
+            print("WARNING: cannot write parameters to ~/.loafrc")
 
     def onReset(self, e):
         '''
