@@ -84,6 +84,7 @@ class CanvasPanel(wx.Panel):
         self.plotSizer = wx.BoxSizer(wx.VERTICAL)
         self.inputSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.textDataSizer = wx.GridSizer(0, 2, 5, 5)
+        self.xyLabelInputSizer = wx.GridSizer(0, 2, 4, 4)
         self.textInputSizer = wx.GridSizer(0, 2, 5, 5)
         self.buttonSizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -92,6 +93,7 @@ class CanvasPanel(wx.Panel):
         self.topSizer.Add(self.plotSizer, 1, wx.EXPAND)
         self.topSizer.Add(self.inputSizer, 0, wx.EXPAND)
         self.inputSizer.Add(self.textDataSizer, 0, wx.EXPAND)
+        self.inputSizer.Add(self.xyLabelInputSizer, 0, wx.EXPAND)
         self.inputSizer.Add(self.textInputSizer, 1, wx.EXPAND)
         self.inputSizer.Add(self.buttonSizer, 0, wx.EXPAND)
 
@@ -115,11 +117,23 @@ class CanvasPanel(wx.Panel):
         self.xDataText = wx.StaticText(self, -1, 'x datum')
         self.yDataText = wx.StaticText(self, -1, 'y datum')
         self.zDataText = wx.StaticText(self, -1, 'z datum')
+
         self.xIdxTextOut = wx.TextCtrl(self, -1, '')
         self.yIdxTextOut = wx.TextCtrl(self, -1, '')
         self.xTextOut = wx.TextCtrl(self, -1, '')
         self.yTextOut = wx.TextCtrl(self, -1, '')
         self.zTextOut = wx.TextCtrl(self, -1, '')
+
+        # for x, y labels
+        self.XLabel2D = wx.StaticText(self, -1, '2D x')
+        self.YLabel2D = wx.StaticText(self, -1, '2D y')
+        self.XLabel1D = wx.StaticText(self, -1, '1D x')
+        self.YLabel1D = wx.StaticText(self, -1, '1D y')
+
+        self.XLabel2DOut = wx.TextCtrl(self, -1, '')
+        self.YLabel2DOut = wx.TextCtrl(self, -1, '')
+        self.XLabel1DOut = wx.TextCtrl(self, -1, '')
+        self.YLabel1DOut = wx.TextCtrl(self, -1, '')
 
         # text input objects
         self.baseText = wx.StaticText(self, -1, "base pathname")
@@ -181,6 +195,16 @@ class CanvasPanel(wx.Panel):
         self.textDataSizer.Add(self.yTextOut, 1, wx.EXPAND)
         self.textDataSizer.Add(self.zDataText, 0, wx.ALIGN_RIGHT)
         self.textDataSizer.Add(self.zTextOut, 1, wx.EXPAND)
+
+        # x, y label sizer
+        self.xyLabelInputSizer.Add(self.XLabel2D, 0, wx.ALIGN_RIGHT)
+        self.xyLabelInputSizer.Add(self.XLabel2DOut, 1, wx.EXPAND)
+        self.xyLabelInputSizer.Add(self.YLabel2D, 0, wx.ALIGN_RIGHT)
+        self.xyLabelInputSizer.Add(self.YLabel2DOut, 1, wx.EXPAND)
+        self.xyLabelInputSizer.Add(self.XLabel1D, 0, wx.ALIGN_RIGHT)
+        self.xyLabelInputSizer.Add(self.XLabel1DOut, 1, wx.EXPAND)
+        self.xyLabelInputSizer.Add(self.YLabel1D, 0, wx.ALIGN_RIGHT)
+        self.xyLabelInputSizer.Add(self.YLabel1DOut, 1, wx.EXPAND)
 
         # text input sizer
         self.textInputSizer.Add(self.baseText, 0, wx.ALIGN_RIGHT)
@@ -385,6 +409,9 @@ class CanvasPanel(wx.Panel):
                     # load/plot data file
                     data = np.loadtxt(fileName)
                     plt = self.axes1D.plot(data[:,0], data[:,1])
+                    # set x, y labels
+                    self.axes1D.set_xlabel(self.XLabel1DOut.GetValue(), size=16)
+                    self.axes1D.set_ylabel(self.YLabel1DOut.GetValue(), size=16)
 
                     self.figure.tight_layout()
                     self.plot.draw()
@@ -410,17 +437,16 @@ class CanvasPanel(wx.Panel):
         # plot data if loaded
         try:
             self.axes2D.imshow(self.zData, interpolation='none')
-            print("xlabels:",[datum[1] for datum in self.xData])
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
         # draw grid, labels
         try:
-            # draw grid
+            # set ticks, draw grid
             self.axes2D.set_xticks(np.arange(0,self.xDim+1) - 0.5, minor=True)
             self.axes2D.set_yticks(np.arange(0,self.yDim+1) - 0.5, minor=True)
             self.axes2D.grid(ls='solid', color='w', which='minor')
-            # write labels
+            # set tick labels
             xTickLabels = ['']
             for datum in self.xData:
                 xTickLabels.append(datum[1])
@@ -431,6 +457,9 @@ class CanvasPanel(wx.Panel):
                 yTickLabels.append('')
             self.axes2D.set_xticklabels(xTickLabels, rotation=90)
             self.axes2D.set_yticklabels(yTickLabels)
+            # set x, y labels
+            self.axes2D.set_xlabel(self.XLabel2DOut.GetValue(), size=16)
+            self.axes2D.set_ylabel(self.YLabel2DOut.GetValue(), size=16)
         except AttributeError, e:
             print("not working: %s" % e)
 
