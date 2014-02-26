@@ -383,7 +383,7 @@ class CanvasPanel(wx.Panel):
         from subprocess import call
         HUDPath = self.getCurrentDatum().path
         try:
-            call(["hud.py", "-d", HUDPath, "-o"])
+            call(["hud.py", "-d", HUDPath])
         except OSError:
             print("hud.py not found in path.")
 
