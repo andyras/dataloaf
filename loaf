@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-debug = False
+debug = True
 
 import numpy as np
 import matplotlib as mp
@@ -333,15 +333,16 @@ class CanvasPanel(wx.Panel):
         self.plot.SetFocus()
 
         # update .loafrc
-        try:
-            with open(loafrc, "w") as f:
-                f.write(self.baseInput.GetValue()+"\n")
-                f.write(self.middleInput.GetValue()+"\n")
-                f.write(self.endInput.GetValue()+"\n")
-                f.write(self.text1DInput.GetValue()+"\n")
-                f.write(self.text2DInput.GetValue()+"\n")
-        except IOError:
-            print("WARNING: cannot write parameters to ~/.loafrc")
+        if (not debug):
+            try:
+                with open(loafrc, "w") as f:
+                    f.write(self.baseInput.GetValue()+"\n")
+                    f.write(self.middleInput.GetValue()+"\n")
+                    f.write(self.endInput.GetValue()+"\n")
+                    f.write(self.text1DInput.GetValue()+"\n")
+                    f.write(self.text2DInput.GetValue()+"\n")
+            except IOError:
+                print("WARNING: cannot write parameters to ~/.loafrc")
 
     def onReset(self, e):
         '''
