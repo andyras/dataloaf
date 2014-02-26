@@ -130,10 +130,6 @@ class CanvasPanel(wx.Panel):
         self.XLabel1D = wx.StaticText(self, -1, '1D x')
         self.YLabel1D = wx.StaticText(self, -1, '1D y')
 
-        self.XLabel2DOut = wx.TextCtrl(self, -1, '')
-        self.YLabel2DOut = wx.TextCtrl(self, -1, '')
-        self.XLabel1DOut = wx.TextCtrl(self, -1, '')
-        self.YLabel1DOut = wx.TextCtrl(self, -1, '')
 
         # text input objects
         self.baseText = wx.StaticText(self, -1, "base pathname")
@@ -147,6 +143,11 @@ class CanvasPanel(wx.Panel):
             self.endInput = wx.TextCtrl(self, -1, "")
             self.text1DInput = wx.TextCtrl(self, -1, "pts.dat")
             self.text2DInput = wx.TextCtrl(self, -1, "dat.dat")
+
+            self.XLabel2DOut = wx.TextCtrl(self, -1, '')
+            self.YLabel2DOut = wx.TextCtrl(self, -1, '')
+            self.XLabel1DOut = wx.TextCtrl(self, -1, '')
+            self.YLabel1DOut = wx.TextCtrl(self, -1, '')
         else:
             # check if last parameters were saved in .loafrc
             try:
@@ -157,6 +158,11 @@ class CanvasPanel(wx.Panel):
                     self.endInput = wx.TextCtrl(self, -1, lines[2].strip())
                     self.text1DInput = wx.TextCtrl(self, -1, lines[3].strip())
                     self.text2DInput = wx.TextCtrl(self, -1, lines[4].strip())
+
+                    self.XLabel2DOut = wx.TextCtrl(self, -1, lines[5].strip())
+                    self.YLabel2DOut = wx.TextCtrl(self, -1, lines[6].strip())
+                    self.XLabel1DOut = wx.TextCtrl(self, -1, lines[7].strip())
+                    self.YLabel1DOut = wx.TextCtrl(self, -1, lines[8].strip())
             # default to blank entry fields
             except IOError:
                 print("WARNING: ~/.loafrc does not exist")
@@ -165,6 +171,11 @@ class CanvasPanel(wx.Panel):
                 self.endInput = wx.TextCtrl(self, -1, "")
                 self.text1DInput = wx.TextCtrl(self, -1, "")
                 self.text2DInput = wx.TextCtrl(self, -1, "")
+
+                self.XLabel2DOut = wx.TextCtrl(self, -1, "")
+                self.YLabel2DOut = wx.TextCtrl(self, -1, "")
+                self.XLabel1DOut = wx.TextCtrl(self, -1, "")
+                self.YLabel1DOut = wx.TextCtrl(self, -1, "")
             except IndexError:
                 print("WARNING: ~/.loafrc corrupted or empty")
                 self.baseInput = wx.TextCtrl(self, -1, "")
@@ -172,6 +183,11 @@ class CanvasPanel(wx.Panel):
                 self.endInput = wx.TextCtrl(self, -1, "")
                 self.text1DInput = wx.TextCtrl(self, -1, "")
                 self.text2DInput = wx.TextCtrl(self, -1, "")
+
+                self.XLabel2DOut = wx.TextCtrl(self, -1, "")
+                self.YLabel2DOut = wx.TextCtrl(self, -1, "")
+                self.XLabel1DOut = wx.TextCtrl(self, -1, "")
+                self.YLabel1DOut = wx.TextCtrl(self, -1, "")
 
         self.loadBtn = wx.Button(self, -1, "Load Data")
         self.Bind(wx.EVT_BUTTON, self.onLoad, id=self.loadBtn.GetId())
@@ -370,6 +386,11 @@ class CanvasPanel(wx.Panel):
                     f.write(self.endInput.GetValue()+"\n")
                     f.write(self.text1DInput.GetValue()+"\n")
                     f.write(self.text2DInput.GetValue()+"\n")
+
+                    f.write(self.XLabel2DOut.GetValue()+"\n")
+                    f.write(self.YLabel2DOut.GetValue()+"\n")
+                    f.write(self.XLabel1DOut.GetValue()+"\n")
+                    f.write(self.YLabel1DOut.GetValue()+"\n")
             except IOError:
                 print("WARNING: cannot write parameters to ~/.loafrc")
 
