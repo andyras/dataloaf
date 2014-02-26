@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-debug = False
+debug = True
 
 import numpy as np
 import matplotlib as mp
@@ -30,6 +30,7 @@ class Datum(object):
         self.y = y[0]
         self.yStr = y[1]
         self.z = 0.0
+        self.path = None
         self.file1D = None
         self.file2D = None
 
@@ -56,6 +57,7 @@ class mainFrame(wx.Frame):
         self.menuExit = self.filemenu.Append(id=-1, text='Exit\tCtrl+w', help='Quit')
         self.menuLoad = self.filemenu.Append(id=-1, text='Load data\tCtrl+l', help='Load data')
         self.menuReset = self.filemenu.Append(id=-1, text='Reset 1D plot\tCtrl+r', help='Reset 1D plot')
+        self.menuHUD = self.filemenu.Append(id=-1, text='Show HUD for datum\tCtrl+h', help='Show HUD for current datum')
 
         self.menubar = wx.MenuBar()
         self.menubar.Append(self.filemenu, title='File')
@@ -64,6 +66,7 @@ class mainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onExit, source=self.menuExit)
         self.Bind(wx.EVT_MENU, self.panel.onLoad, source=self.menuLoad)
         self.Bind(wx.EVT_MENU, self.panel.onReset, source=self.menuReset)
+        self.Bind(wx.EVT_MENU, self.panel.onHUD, source=self.menuHUD)
 
     def onExit(self, e):
         self.Close(True)
@@ -299,6 +302,7 @@ class CanvasPanel(wx.Panel):
                 # create datum object
                 datum = Datum(ii, jj, self.xData[ii], self.yData[jj])
                 datumPath = basePath + datum.xStr + midPath + datum.yStr + endPath + '/'
+                datum.path = datumPath
                 datum.file1D = datumPath + self.text1DInput.GetValue()
                 datum.file2D = datumPath + self.text2DInput.GetValue()
                 if (datum.file2D != ''):
@@ -344,6 +348,14 @@ class CanvasPanel(wx.Panel):
         Reset the plots
         '''
         self.resetPlots()
+
+    def onHUD(self, e):
+        from subprocess import call
+        HUDPath = self.getCurrentDatum().path
+        try:
+            call(["hud.py", "-d", HUDPath])
+        except OSError:
+            print("hud.py not found in path.")
 
     def resetPlots(self):
         '''
