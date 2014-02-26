@@ -292,8 +292,13 @@ class CanvasPanel(wx.Panel):
             print 'xData:', self.xData
             print 'yData:', self.yData
 
+        if (True):
+            print("setting xDim and yDim")
         self.xDim = len(self.xData)
         self.yDim = len(self.yData)
+        if (debug):
+            print("xDim is ", self.xDim)
+            print("yDim is ", self.xDim)
         self.zData = np.zeros(self.xDim*self.yDim).reshape(self.xDim, self.yDim)
 
         self.dataMap = {}
@@ -405,9 +410,29 @@ class CanvasPanel(wx.Panel):
         # plot data if loaded
         try:
             self.axes2D.imshow(self.zData, interpolation='none')
+            print("xlabels:",[datum[1] for datum in self.xData])
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
+        # draw grid, labels
+        try:
+            # draw grid
+            self.axes2D.set_xticks(np.arange(0,self.xDim+1) - 0.5, minor=True)
+            self.axes2D.set_yticks(np.arange(0,self.yDim+1) - 0.5, minor=True)
+            self.axes2D.grid(ls='solid', color='w', which='minor')
+            # write labels
+            xTickLabels = ['']
+            for datum in self.xData:
+                xTickLabels.append(datum[1])
+                xTickLabels.append('')
+            yTickLabels = ['']
+            for datum in self.yData:
+                yTickLabels.append(datum[1])
+                yTickLabels.append('')
+            self.axes2D.set_xticklabels(xTickLabels, rotation=90)
+            self.axes2D.set_yticklabels(yTickLabels)
+        except AttributeError, e:
+            print("not working: %s" % e)
 
         self.figure.tight_layout()
         self.plot.draw()
