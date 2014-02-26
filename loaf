@@ -401,10 +401,10 @@ class CanvasPanel(wx.Panel):
         self.resetPlots()
 
     def onHUD(self, e):
-        from subprocess import call
+        from subprocess import Popen
         HUDPath = self.getCurrentDatum().path
         try:
-            call(["hud.py", "-d", HUDPath])
+            Popen(["hud.py", "-d", HUDPath])
         except OSError:
             print("hud.py not found in path.")
 
@@ -463,7 +463,10 @@ class CanvasPanel(wx.Panel):
                 print 'There is no self.zData matrix'
         # draw grid, labels
         try:
-            # set ticks, draw grid
+            # set ticks
+            self.axes2D.set_xticks(np.arange(0,self.xDim))
+            self.axes2D.set_yticks(np.arange(0,self.yDim))
+            # set minor ticks, draw grid
             self.axes2D.set_xticks(np.arange(0,self.xDim+1) - 0.5, minor=True)
             self.axes2D.set_yticks(np.arange(0,self.yDim+1) - 0.5, minor=True)
             self.axes2D.grid(ls='solid', color='w', which='minor')
