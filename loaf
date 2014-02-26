@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-debug = True
+debug = False
 
 import numpy as np
 import matplotlib as mp
@@ -353,7 +353,7 @@ class CanvasPanel(wx.Panel):
         from subprocess import call
         HUDPath = self.getCurrentDatum().path
         try:
-            call(["hud.py", "-d", HUDPath])
+            call(["hud.py", "-d", HUDPath, "-o"])
         except OSError:
             print("hud.py not found in path.")
 
