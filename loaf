@@ -471,14 +471,14 @@ class CanvasPanel(wx.Panel):
             self.axes2D.set_yticks(np.arange(0,self.yDim+1) - 0.5, minor=True)
             self.axes2D.grid(ls='solid', color='w', which='minor')
             # set tick labels
-            xTickLabels = ['']
+            xTickLabels = []
             for datum in self.xData:
                 xTickLabels.append(datum[1])
-                xTickLabels.append('')
-            yTickLabels = ['']
+                #xTickLabels.append('')
+            yTickLabels = []
             for datum in self.yData:
                 yTickLabels.append(datum[1])
-                yTickLabels.append('')
+                #yTickLabels.append('')
             self.axes2D.set_xticklabels(xTickLabels, rotation=90)
             self.axes2D.set_yticklabels(yTickLabels)
             # set x, y labels
