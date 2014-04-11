@@ -7,6 +7,8 @@ import matplotlib as mp
 
 mp.use('WXAgg')
 
+from pylab import *
+
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.figure import Figure
@@ -78,6 +80,12 @@ class CanvasPanel(wx.Panel):
         self.xIdx = 0
         self.yIdx = 0
 
+        self.xDim = 1
+        self.yDim = 1
+
+        self.xData = []
+        self.yData = []
+
         #### make sizers
 
         self.topSizer = wx.BoxSizer(wx.VERTICAL)
@@ -99,18 +107,6 @@ class CanvasPanel(wx.Panel):
 
         #### make objects
 
-        # mp figure object for 1D plot
-        self.figure = Figure()
-        gs = mp.gridspec.GridSpec(1, 2, width_ratios=[1,1.618])
-        self.axes2D = self.figure.add_subplot(gs[0])
-        self.axes1D = self.figure.add_subplot(gs[1])
-        self.plot = FigureCanvas(self, -1, self.figure)
-        plt = self.drawPlot1D(True)
-        self.drawPlot2D()
-        # bind clicking on plot
-        self.plot.mpl_connect('button_press_event', self.onPlotClick)
-        self.plot.mpl_connect('key_press_event', self.onKey)
-
         # text data objects
         self.xIdxText = wx.StaticText(self, -1, 'x index')
         self.yIdxText = wx.StaticText(self, -1, 'y index')
@@ -129,6 +125,11 @@ class CanvasPanel(wx.Panel):
         self.YLabel2D = wx.StaticText(self, -1, '2D y')
         self.XLabel1D = wx.StaticText(self, -1, '1D x')
         self.YLabel1D = wx.StaticText(self, -1, '1D y')
+
+        self.XLabel2DOut = wx.TextCtrl(self, -1, '')
+        self.YLabel2DOut = wx.TextCtrl(self, -1, '')
+        self.XLabel1DOut = wx.TextCtrl(self, -1, '')
+        self.YLabel1DOut = wx.TextCtrl(self, -1, '')
 
 
         # text input objects
@@ -194,6 +195,18 @@ class CanvasPanel(wx.Panel):
 
         self.resetBtn = wx.Button(self, -1, "Reset 1D Plot")
         self.Bind(wx.EVT_BUTTON, self.onReset, id=self.resetBtn.GetId())
+
+        # mp figure object for 1D plot
+        self.figure = Figure()
+        gs = mp.gridspec.GridSpec(1, 2, width_ratios=[1,1.618])
+        self.axes2D = self.figure.add_subplot(gs[0])
+        self.axes1D = self.figure.add_subplot(gs[1])
+        self.plot = FigureCanvas(self, -1, self.figure)
+        plt = self.drawPlot1D(True)
+        self.drawPlot2D()
+        # bind clicking on plot
+        self.plot.mpl_connect('button_press_event', self.onPlotClick)
+        self.plot.mpl_connect('key_press_event', self.onKey)
 
         #### add objects to sizers
 
@@ -457,7 +470,10 @@ class CanvasPanel(wx.Panel):
 
         # plot data if loaded
         try:
-            self.axes2D.imshow(self.zData, interpolation='none')
+            self.axes2D.imshow(self.zData, interpolation='none', cmap=get_cmap('copper'))
+            #self.axes2D.imshow(self.zData, interpolation='none', cmap='gist_gray')
+            #self.axes2D.imshow(self.zData, interpolation='none', cmap=mp.pylab.cm.coolwarm)
+            #self.axes2D.set_cmap(mp.pylab.cm.coolwarm)
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
