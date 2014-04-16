@@ -306,108 +306,112 @@ class CanvasPanel(wx.Panel):
         globber = basePath + '*' + midPath + '*' + endPath
         globs = glob.glob(globber)
         if (debug):
-            print globber
-            print globs
+            print("Glob string: ", globber)
+            print("Globbed directories: ", globs)
 
-        # sets of x and y points
-        xpts = set([])
-        ypts = set([])
+        # only do anything if directories actually exist
+        if (globs != []):
+            # sets of x and y points
+            xpts = set([])
+            ypts = set([])
 
-        for glb in globs:
-            # index of midPath will be after basePath
-            midIdx = glb.find(midPath, len(basePath))
-            # index of endPath will be after midPath
-            if (endPath == ''):
-                endIdx = len(glb)
-            else:
-                endIdx = glb.find(endPath, midIdx+len(midPath))
-            # between basePath and midPath is x datum
-            xpts.add(glb[len(basePath):midIdx])
-            # between midPath and endPath is y datum
-            ypts.add(glb[midIdx+len(midPath):endIdx])
+            for glb in globs:
+                # index of midPath will be after basePath
+                midIdx = glb.find(midPath, len(basePath))
+                # index of endPath will be after midPath
+                if (endPath == ''):
+                    endIdx = len(glb)
+                else:
+                    endIdx = glb.find(endPath, midIdx+len(midPath))
+                # between basePath and midPath is x datum
+                xpts.add(glb[len(basePath):midIdx])
+                # between midPath and endPath is y datum
+                ypts.add(glb[midIdx+len(midPath):endIdx])
 
-        if (debug):
-            print 'xpts:', xpts
-            print 'ypts:', ypts
+            if (debug):
+                print 'xpts:', xpts
+                print 'ypts:', ypts
 
-        # map of x, y value to file string
-        self.xData = []
-        for x in list(xpts):
-            self.xData.append((float(x), x))
-        self.xData.sort()
+            # map of x, y value to file string
+            self.xData = []
+            for x in list(xpts):
+                self.xData.append((float(x), x))
+            self.xData.sort()
 
-        self.yData = []
-        for y in list(ypts):
-            self.yData.append((float(y), y))
-        self.yData.sort()
+            self.yData = []
+            for y in list(ypts):
+                self.yData.append((float(y), y))
+            self.yData.sort()
 
-        if (debug):
-            print 'xData:', self.xData
-            print 'yData:', self.yData
+            if (debug):
+                print 'xData:', self.xData
+                print 'yData:', self.yData
 
-        if (True):
-            print("setting xDim and yDim")
-        self.xDim = len(self.xData)
-        self.yDim = len(self.yData)
-        if (debug):
-            print("xDim is ", self.xDim)
-            print("yDim is ", self.xDim)
-        # note order of x and y in reshape; np arrays are row-major
-        self.zData = np.zeros(self.xDim*self.yDim).reshape(self.yDim, self.xDim)
+            if (True):
+                print("setting xDim and yDim")
+            self.xDim = len(self.xData)
+            self.yDim = len(self.yData)
+            if (debug):
+                print("xDim is ", self.xDim)
+                print("yDim is ", self.xDim)
+            # note order of x and y in reshape; np arrays are row-major
+            self.zData = np.zeros(self.xDim*self.yDim).reshape(self.yDim, self.xDim)
 
-        self.dataMap = {}
-        for ii in range(len(self.xData)):
-            for jj in range(len(self.yData)):
-                # create datum object
-                datum = Datum(ii, jj, self.xData[ii], self.yData[jj])
-                datumPath = basePath + datum.xStr + midPath + datum.yStr + endPath + '/'
-                datum.path = datumPath
-                datum.file1D = datumPath + self.text1DInput.GetValue()
-                datum.file2D = datumPath + self.text2DInput.GetValue()
-                # default to 0.0 for z-value
-                datum.z = np.array([0.0])
-                if (datum.file2D != ''):
-                    try:
-                        datum.z = np.loadtxt(datum.file2D)
-                    except IOError:
-                        if (debug):
-                            print 'loading from %s failed: file does not exist' % datum.file2D
-                self.dataMap[(ii, jj)] = datum
+            self.dataMap = {}
+            for ii in range(len(self.xData)):
+                for jj in range(len(self.yData)):
+                    # create datum object
+                    datum = Datum(ii, jj, self.xData[ii], self.yData[jj])
+                    datumPath = basePath + datum.xStr + midPath + datum.yStr + endPath + '/'
+                    datum.path = datumPath
+                    datum.file1D = datumPath + self.text1DInput.GetValue()
+                    datum.file2D = datumPath + self.text2DInput.GetValue()
+                    # default to 0.0 for z-value
+                    datum.z = np.array([0.0])
+                    if (datum.file2D != ''):
+                        try:
+                            datum.z = np.loadtxt(datum.file2D)
+                        except IOError:
+                            if (debug):
+                                print 'loading from %s failed: file does not exist' % datum.file2D
+                    self.dataMap[(ii, jj)] = datum
 
-                # add to zData matrix
-                # note order of jj and ii; np arrays are row-major
-                self.zData[jj, ii] = datum.z
+                    # add to zData matrix
+                    # note order of jj and ii; np arrays are row-major
+                    self.zData[jj, ii] = datum.z
 
-        if (debug):
-            for datum in self.dataMap.values():
-                print datum
-            print self.zData
+            if (debug):
+                for datum in self.dataMap.values():
+                    print datum
+                print self.zData
 
-        # important to reset indices if loading different data sets
-        self.xIdx, self.yIdx = 0, 0
+            # important to reset indices if loading different data sets
+            self.xIdx, self.yIdx = 0, 0
 
-        # reset plots
-        self.resetPlots()
+            # reset plots
+            self.resetPlots()
 
-        # set focus on plot
-        self.plot.SetFocus()
+            # set focus on plot
+            self.plot.SetFocus()
 
-        # update .loafrc
-        if (not debug):
-            try:
-                with open(loafrc, "w") as f:
-                    f.write(self.baseInput.GetValue()+"\n")
-                    f.write(self.middleInput.GetValue()+"\n")
-                    f.write(self.endInput.GetValue()+"\n")
-                    f.write(self.text1DInput.GetValue()+"\n")
-                    f.write(self.text2DInput.GetValue()+"\n")
+            # update .loafrc
+            if (not debug):
+                try:
+                    with open(loafrc, "w") as f:
+                        f.write(self.baseInput.GetValue()+"\n")
+                        f.write(self.middleInput.GetValue()+"\n")
+                        f.write(self.endInput.GetValue()+"\n")
+                        f.write(self.text1DInput.GetValue()+"\n")
+                        f.write(self.text2DInput.GetValue()+"\n")
 
-                    f.write(self.XLabel2DOut.GetValue()+"\n")
-                    f.write(self.YLabel2DOut.GetValue()+"\n")
-                    f.write(self.XLabel1DOut.GetValue()+"\n")
-                    f.write(self.YLabel1DOut.GetValue()+"\n")
-            except IOError:
-                print("WARNING: cannot write parameters to ~/.loafrc")
+                        f.write(self.XLabel2DOut.GetValue()+"\n")
+                        f.write(self.YLabel2DOut.GetValue()+"\n")
+                        f.write(self.XLabel1DOut.GetValue()+"\n")
+                        f.write(self.YLabel1DOut.GetValue()+"\n")
+                except IOError:
+                    print("WARNING: cannot write parameters to ~/.loafrc")
+        else:
+            print("WARNING: '%s' does not match any directories.  Try again." % globber)
 
     def onReset(self, e):
         '''
