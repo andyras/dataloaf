@@ -352,7 +352,7 @@ class CanvasPanel(wx.Panel):
         if (debug):
             print("xDim is ", self.xDim)
             print("yDim is ", self.xDim)
-        self.zData = np.zeros(self.xDim*self.yDim).reshape(self.xDim, self.yDim)
+        self.zData = np.zeros(self.xDim*self.yDim).reshape(self.yDim, self.xDim)
 
         self.dataMap = {}
         for ii in range(len(self.xData)):
@@ -363,18 +363,18 @@ class CanvasPanel(wx.Panel):
                 datum.path = datumPath
                 datum.file1D = datumPath + self.text1DInput.GetValue()
                 datum.file2D = datumPath + self.text2DInput.GetValue()
+                # default to 0.0 for z-value
+                datum.z = np.array([0.0])
                 if (datum.file2D != ''):
                     try:
                         datum.z = np.loadtxt(datum.file2D)
                     except IOError:
                         if (debug):
                             print 'loading from %s failed: file does not exist' % datum.file2D
-                else:
-                    datum.z = np.array([0.0])
                 self.dataMap[(ii, jj)] = datum
 
                 # add to zData matrix
-                self.zData[ii, jj] = datum.z
+                self.zData[jj, ii] = datum.z
 
         if (debug):
             for datum in self.dataMap.values():
@@ -471,9 +471,6 @@ class CanvasPanel(wx.Panel):
         # plot data if loaded
         try:
             self.axes2D.imshow(self.zData, interpolation='none', cmap=get_cmap('copper'))
-            #self.axes2D.imshow(self.zData, interpolation='none', cmap='gist_gray')
-            #self.axes2D.imshow(self.zData, interpolation='none', cmap=mp.pylab.cm.coolwarm)
-            #self.axes2D.set_cmap(mp.pylab.cm.coolwarm)
         except AttributeError:
             if (debug):
                 print 'There is no self.zData matrix'
@@ -522,8 +519,8 @@ class CanvasPanel(wx.Panel):
 
         # add white-bordered circle to 2D plot, reset axis limits
         self.axes2D.plot([self.xIdx], [self.yIdx], 'o', ms=12, mec='white', mew=2, color=c)
-        self.axes2D.set_xlim([-0.5, self.xDim-0.5])
         self.axes2D.set_ylim([-0.5, self.yDim-0.5])
+        self.axes2D.set_xlim([-0.5, self.xDim-0.5])
 
         # redraw plot
         self.plot.draw()
