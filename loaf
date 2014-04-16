@@ -352,6 +352,7 @@ class CanvasPanel(wx.Panel):
         if (debug):
             print("xDim is ", self.xDim)
             print("yDim is ", self.xDim)
+        # note order of x and y in reshape; np arrays are row-major
         self.zData = np.zeros(self.xDim*self.yDim).reshape(self.yDim, self.xDim)
 
         self.dataMap = {}
@@ -374,6 +375,7 @@ class CanvasPanel(wx.Panel):
                 self.dataMap[(ii, jj)] = datum
 
                 # add to zData matrix
+                # note order of jj and ii; np arrays are row-major
                 self.zData[jj, ii] = datum.z
 
         if (debug):
